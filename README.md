@@ -15,4 +15,4 @@ FreeRTOS starter project for STM32 F1 and F4 microcontrollers.
 
 ## Building
 1. 'cd' to the root of base project directory
-2. type 'make APP=<your_app_name>'
+2. type 'make APP=your\_app\_name'
