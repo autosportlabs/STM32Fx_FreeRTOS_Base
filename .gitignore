@@ -16,3 +16,10 @@
 *.exe
 *.out
 *.app
+
+#dependancy files
+*.d
+
+# Binary files
+*.bin
+*.elf
