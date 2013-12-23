@@ -8,7 +8,7 @@ void blinky_task(void *params)
 {
 	(void)params;
 
-	/* 500Ms delay */
+	/* 250Ms delay */
 	const portTickType heartbeat_delay = 250 / portTICK_RATE_MS;
 
 	uint8_t led_num = 0;
