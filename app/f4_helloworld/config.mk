@@ -28,7 +28,7 @@ APP_SRC = main.c leds.c blinky.c
 #and adds a macro explaining how to convert them to binary
 APP_OBJS = $(addprefix $(APP_BASE)/, $(APP_SRC:.c=.o))
 
-# Adds this directory to the global application includes 
+# Adds this directory to the global application includes
 APP_INCLUDES += -Iapp/f4_helloworld
 
 # CPU is generally defined by the Board's config.mk file

@@ -23,7 +23,7 @@ void led_init(void)
 
 	/* Clear the GPIO Structure */
 	GPIO_StructInit(&gpio_conf);
-	
+
 	/* turn on debug port and clock */
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 

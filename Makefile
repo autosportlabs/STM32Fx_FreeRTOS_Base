@@ -1,16 +1,16 @@
 # This file is part of the Racecapture/Track project
 #
 # Copyright (C) 2013 Autosport Labs
-# 
+#
 # Author(s):
 # 	Andrey Smirnov <andrew.smirnov@gmail.com>
 # 	Jeff Ciesielski <jeffciesielski@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -104,7 +104,7 @@ $(TARGET).bin: $(TARGET).elf
 
 $(TARGET).elf: $(OBJS)
 	@printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(CC) -o $@ $(OBJS) $(LDFLAGS) 
+	$(Q)$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
 .c.o:
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
