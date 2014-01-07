@@ -51,6 +51,10 @@ OBJDUMP := $(PREFIX)-objdump
 SIZE    := $(PREFIX)-size
 PROTOC  := java -jar ../tools/protoc-1.0M4.jar
 
+OPENOCD := openocd
+DDD     := ddd
+GDB     := $(PREFIX)-gdb
+
 #application libraries
 include libs.mk
 
@@ -123,4 +127,10 @@ clean:
 flash: $(TARGET).bin
 	$(APP_FLASH)
 
-.PHONY: clean flash
+debug: $(TARGET).bin
+	$(OPENOCD) -f $(APP_PATH)/openocd.cfg
+
+ddd: $(TARGET).elf
+	$(DDD) --eval-command="target remote localhost:3333" --debugger $(GDB) $(TARGET).elf
+
+.PHONY: clean flash debug ddd
