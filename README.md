@@ -16,3 +16,12 @@ FreeRTOS starter project for STM32 F1 and F4 microcontrollers.
 ## Building
 1. 'cd' to the root of base project directory
 2. type 'make APP=your\_app\_name'
+
+## Debugging
+1. Install openocd with support for your JTAG dongle
+2. Add an openocd.cfg to your project (see existing examples)
+3. Install DDD (data display debugger) (optional)
+4. Type: sudo make APP=your\_app\_name openocd (this starts the
+   debugger)
+5. Attach your favorite debugger (gdb/ddd/insight) to the openocd
+   session (a make command for ddd is included in the makefile)
