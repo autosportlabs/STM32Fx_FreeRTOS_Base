@@ -49,7 +49,6 @@ NM      := $(PREFIX)-nm
 OBJCOPY := $(PREFIX)-objcopy
 OBJDUMP := $(PREFIX)-objdump
 SIZE    := $(PREFIX)-size
-PROTOC  := java -jar ../tools/protoc-1.0M4.jar
 
 OPENOCD := openocd
 DDD     := ddd
@@ -62,7 +61,7 @@ CFLAGS ?= -Os -g -Wall -Wextra -fno-common -c -mthumb \
 	  -mcpu=$(CPU_TYPE) -MD -std=gnu99
 
 INCLUDES += $(CPU_INCLUDES) $(BOARD_INCLUDES) $(LIB_INCLUDES) $(APP_INCLUDES)
-CFLAGS +=  $(INCLUDES) $(CPU_DEFINES) $(CPU_FLAGS)
+CFLAGS += $(INCLUDES) $(CPU_DEFINES) $(BOARD_DEFINES) $(APP_DEFINES) $(CPU_FLAGS)
 ASFLAGS += -mcpu=$(CPU_TYPE) $(FPU) -g -Wa,--warn
 
 LIBS = -lnosys
@@ -72,7 +71,6 @@ LDFLAGS ?= --specs=nano.specs -lc -lgcc $(LIBS) -mcpu=$(CPU_TYPE) -g -gdwarf-2 \
 	-L. -Lcpu/common -L$(CPU_BASE) -T$(CPU_LINK_MEM) -Tlink_sections.ld \
 	-nostartfiles -Wl,--gc-sections -mthumb -mcpu=$(CPU_TYPE) \
 	-msoft-float
-
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
@@ -132,5 +130,8 @@ debug: $(TARGET).bin
 
 ddd: $(TARGET).elf
 	$(DDD) --eval-command="target remote localhost:3333" --debugger $(GDB) $(TARGET).elf
+
+gdb: $(TARGET).elf
+	$(GDB) -ex "target ext localhost:3333" -ex "mon reset halt" -ex "mon arm semihosting enable" $(TARGET).elf
 
 .PHONY: clean flash debug ddd
