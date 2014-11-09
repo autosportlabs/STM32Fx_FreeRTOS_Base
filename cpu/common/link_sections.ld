@@ -26,6 +26,9 @@
  */
 ENTRY(Reset_Handler)
 
+/* WHATS UP WITH ALL THE ALIGNMENTS!?! -- Gotta make sure that CM0 */
+/* parts don't end up with unaligned access hardfaults */
+
  SECTIONS
  {
    /* The startup code goes first into FLASH */
@@ -41,13 +44,20 @@ ENTRY(Reset_Handler)
    {
      . = ALIGN(4);
      *(.text)           /* .text sections (code) */
+     . = ALIGN(4);
      *(.text*)          /* .text* sections (code) */
+     . = ALIGN(4);
      *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+     . = ALIGN(4);
      *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+     . = ALIGN(4);
      *(.glue_7)         /* glue arm to thumb code */
+     . = ALIGN(4);
      *(.glue_7t)        /* glue thumb to arm code */
 
+     . = ALIGN(4);
      KEEP (*(.init))
+     . = ALIGN(4);
      KEEP (*(.fini))
 
      . = ALIGN(4);
@@ -85,6 +95,7 @@ ENTRY(Reset_Handler)
      PROVIDE_HIDDEN (__fini_array_end = .);
    } >FLASH
 
+   . = ALIGN(4);
    /* used by the startup to initialize data */
    _sidata = .;
 
@@ -93,7 +104,9 @@ ENTRY(Reset_Handler)
    {
      . = ALIGN(4);
      _sdata = .;        /* create a global symbol at data start */
+     . = ALIGN(4);
      *(.data)           /* .data sections */
+     . = ALIGN(4);
      *(.data*)          /* .data* sections */
 
      . = ALIGN(4);
@@ -107,8 +120,11 @@ ENTRY(Reset_Handler)
      /* This is used by the startup in order to initialize the .bss secion */
      _sbss = .;         /* define a global symbol at bss start */
      __bss_start__ = _sbss;
+     . = ALIGN(4);
      *(.bss)
+     . = ALIGN(4);
      *(.bss*)
+     . = ALIGN(4);
      *(COMMON)
 
      . = ALIGN(4);

@@ -57,7 +57,7 @@ GDB     := $(PREFIX)-gdb
 #application libraries
 include libs.mk
 
-CFLAGS ?= -Os -g -Wall -Wextra -fno-common -c -mthumb \
+CFLAGS ?= -Os -g -Wall -fno-common -c -mthumb \
 	  -mcpu=$(CPU_TYPE) -MD -std=gnu99
 
 INCLUDES += $(CPU_INCLUDES) $(BOARD_INCLUDES) $(LIB_INCLUDES) $(APP_INCLUDES)
@@ -97,6 +97,9 @@ libfreertos.a: $(FREERTOS_OBJS)
 libstm32f4_periph.a: $(STM32F4_PERIPH_OBJS)
 	$(Q)$(AR) $(ARFLAGS) $@ $^
 
+libstm32f0_periph.a: $(STM32F0_PERIPH_OBJS)
+	$(Q)$(AR) $(ARFLAGS) $@ $^
+
 libstm32_usb.a: $(STM32_USB_OBJS)
 	$(Q)$(AR) $(ARFLAGS) $@ $^
 
@@ -107,6 +110,7 @@ $(TARGET).bin: $(TARGET).elf
 $(TARGET).elf: $(OBJS)
 	@printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) -o $@ $(OBJS) $(LDFLAGS)
+	$(PREFIX)-size $(TARGET).elf
 
 .c.o:
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
@@ -117,9 +121,10 @@ $(TARGET).elf: $(OBJS)
 	$(Q)$(CC) $(ASFLAGS) -c -o $@ $<
 
 clean:
-	$(Q)rm -f *.o *.a *.d ../*.o ../*.d $(OBJS) $(LIBS_ALL)\
-	$(STM32F4_PERIPH_OBJS) $(FREERTOS_OBJS)\
-	$(shell find . -name "*.d")\
+	$(Q)rm -f *.o *.a *.d ../*.o ../*.d $(OBJS) $(LIBS_ALL) \
+	$(STM32F4_PERIPH_OBJS) $(FREERTOS_OBJS) \
+	$(STM32F0_PERIPH_OBJS) \
+	$(shell find . -name "*.d") \
 	$(TARGET).bin $(TARGET).elf
 
 flash: $(TARGET).bin

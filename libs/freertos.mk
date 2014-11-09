@@ -7,7 +7,7 @@ ifneq ($(FREERTOS),)
 FREERTOS_SOURCE ?= libs/$(FREERTOS)/FreeRTOS/Source
 rtos_srcs = croutine.c list.c queue.c tasks.c timers.c
 
-ifeq ($(CPU_ARCH),CM0)
+ifeq ($(CPU_ARCH),ARMCM0)
 FREERTOS_PORT = ARM_CM0
 endif
 ifeq ($(CPU_ARCH),ARMCM3)

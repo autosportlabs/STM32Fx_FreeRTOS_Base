@@ -17,6 +17,8 @@
 #include <stm32f30x_dbgmcu.h>
 #elif defined (STM32L1XX)
 #include <stm32l1xx_dbgmcu.h>
+#elif defined (STM32F0XX)
+#include <stm32f0xx_dbgmcu.h>
 #else
 #error "I don't know which MCU and CPU to target."
 #endif
