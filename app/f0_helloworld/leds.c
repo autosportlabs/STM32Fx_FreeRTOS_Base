@@ -40,11 +40,13 @@ void led_init(void)
 
 void led_set(uint8_t led)
 {
+	leds[led].level = 1;
 	GPIO_SetBits(leds[led].port, leds[led].mask);
 }
 
 void led_clear(uint8_t led)
 {
+	leds[led].level = 0;
 	GPIO_ResetBits(leds[led].port, leds[led].mask);
 }
 
