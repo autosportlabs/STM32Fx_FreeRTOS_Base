@@ -17,9 +17,12 @@
 *.out
 *.app
 
-#dependancy files
+# Dependency files
 *.d
 
 # Binary files
 *.bin
 *.elf
+
+# Miscellaneous files
+app.default

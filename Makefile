@@ -25,18 +25,24 @@
 -include config.mk
 
 ifeq ($(APP),)
-$(error APP is not defined.  Pass it in as APP= or create a config.mk file)
+  ifeq ($(wildcard app.default),)
+    $(error APP is not defined.  Pass it in as APP= or create a config.mk file)
+  else
+    APP = $(shell cat app.default)
+  endif
+else
+$(shell echo "$(APP)" > app.default)
 endif
 
 ifeq ($(APP_PATH),)
-APP_PATH = app/$(APP)
+  APP_PATH = app/$(APP)
 endif
 
 #load the board specific configuration
 include $(APP_PATH)/config.mk
 
 ifeq ($(CPU_TYPE),)
-$(error CPU_TYPE is not defined, please ensure it is defined in your cpu config.mk)
+  $(error CPU_TYPE is not defined, please ensure it is defined in your cpu config.mk)
 endif
 
 PREFIX	?= arm-none-eabi
@@ -74,17 +80,16 @@ LDFLAGS ?= --specs=nano.specs -lc -lgcc $(LIBS) -mcpu=$(CPU_TYPE) -g -gdwarf-2 \
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
-
-Q := @
-# Do not print "Entering directory ...".
-MAKEFLAGS += --no-print-directory
+  Q := @
+  # Do not print "Entering directory ...".
+  MAKEFLAGS += --no-print-directory
 endif
 
 # common objects
 OBJS += $(CPU_OBJS) $(BOARD_OBJS) $(APP_OBJS)
 
 ifeq ($(TARGET),)
-$(error TARGET is not defined, please define it in your applications config.mk)
+  $(error TARGET is not defined, please define it in your applications config.mk)
 endif
 
 LIBS_ALL = $(addprefix lib,$(BASE_LIBS:=.a))
