@@ -30,8 +30,6 @@ $(warning No heap selected, defaulting to heap 1 (Memory cannot be freed!!))
 FREERTOS_HEAP = heap_1
 endif
 
-SRCS += utils/sbrk.c
-
 FREERTOS_SRCS += $(FREERTOS_SOURCE)/portable/MemMang/$(FREERTOS_HEAP).c $(RTOS_PORT_SRC)
 
 #All of the standard sources
