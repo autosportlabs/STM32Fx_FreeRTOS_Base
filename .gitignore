@@ -1,25 +1,28 @@
 # Object files
-*.o
 *.ko
+*.o
 
 # Libraries
-*.lib
 *.a
+*.lib
 
 # Shared objects (inc. Windows DLLs)
 *.dll
-*.so
-*.so.*
 *.dylib
+*.so.*
+*.so
 
 # Executables
+*.app
 *.exe
 *.out
-*.app
 
-#dependancy files
+# Dependency files
 *.d
 
 # Binary files
 *.bin
 *.elf
+
+# Miscellaneous files
+app.default
