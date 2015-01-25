@@ -34,9 +34,6 @@ APP_SRC = main.c leds.c blinky.c usbd_usr.c usbd_desc.c usb_bsp.c usbd_cdc_vcp.c
 #and adds a macro explaining how to convert them to binary
 APP_OBJS = $(addprefix $(APP_BASE)/, $(APP_SRC:.c=.o))
 
-# Adds this directory to the global application includes
-APP_INCLUDES += -Iapp/f4_cdcacm
-
 #Uncomment the following to enable newlib support
 APP_INCLUDES += -Iutil
 NEWLIB_SRC += newlib.c

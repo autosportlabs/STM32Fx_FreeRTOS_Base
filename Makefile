@@ -34,11 +34,10 @@ else
 $(shell echo "$(APP)" > app.default)
 endif
 
-ifeq ($(APP_PATH),)
-  APP_PATH = app/$(APP)
-endif
+APP_PATH     := app/$(APP)
+APP_INCLUDES += -I$(APP_PATH)
 
-#load the board specific configuration
+# load the board specific configuration
 include $(APP_PATH)/config.mk
 
 ifeq ($(CPU_TYPE),)
