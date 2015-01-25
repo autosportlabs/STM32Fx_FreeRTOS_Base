@@ -125,10 +125,11 @@ $(TARGET).elf: $(OBJS)
 	$(Q)$(CC) $(ASFLAGS) -c -o $@ $<
 
 clean:
-	$(Q)rm -f *.o *.a *.d ../*.o ../*.d $(OBJS) $(LIBS_ALL) \
-	$(STM32F4_PERIPH_OBJS) $(FREERTOS_OBJS) \
-	$(STM32F0_PERIPH_OBJS) \
-	$(shell find . -name "*.d") \
+	$(Q)rm -f *.a $(OBJS) $(LIBS_ALL) \
+	$(STM32F4_PERIPH_OBJS)            \
+	$(STM32F0_PERIPH_OBJS)            \
+	$(FREERTOS_OBJS)                  \
+	$(shell find . -name "*.d")       \
 	$(TARGET).bin $(TARGET).elf
 
 st-flash: $(TARGET).bin
