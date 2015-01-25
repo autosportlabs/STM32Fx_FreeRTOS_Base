@@ -132,8 +132,8 @@ clean:
 	$(shell find . -name "*.d") \
 	$(TARGET).bin $(TARGET).elf
 
-flash: $(TARGET).bin
-	$(APP_FLASH)
+st-flash: $(TARGET).bin
+	sudo st-flash write $(TARGET).bin 0x08000000
 
 debug: $(TARGET).bin
 	$(OPENOCD) -f $(APP_PATH)/openocd.cfg

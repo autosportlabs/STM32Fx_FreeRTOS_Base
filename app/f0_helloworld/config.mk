@@ -39,9 +39,5 @@ APP_INCLUDES += -Iapp/f0_helloworld
 
 # CPU is generally defined by the Board's config.mk file
 ifeq ($(CPU),)
-$(error CPU is not defined, please define it in your CPU specific config.mk file)
+  $(error CPU is not defined, please define it in your CPU specific config.mk file)
 endif
-
-#Optional command to flash the board using an ST-Link
-APP_FLASH = sudo st-flash write $(TARGET).bin 0x08000000
-
