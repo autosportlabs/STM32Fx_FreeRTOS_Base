@@ -1,21 +1,21 @@
 # Object files
-*.o
 *.ko
+*.o
 
 # Libraries
-*.lib
 *.a
+*.lib
 
 # Shared objects (inc. Windows DLLs)
 *.dll
-*.so
-*.so.*
 *.dylib
+*.so.*
+*.so
 
 # Executables
+*.app
 *.exe
 *.out
-*.app
 
 # Dependency files
 *.d
