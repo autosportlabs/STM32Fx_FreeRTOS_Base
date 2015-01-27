@@ -4,41 +4,36 @@
 
 ifneq ($(FREERTOS),)
 
-FREERTOS_SOURCE ?= libs/$(FREERTOS)/FreeRTOS/Source
-rtos_srcs = croutine.c list.c queue.c tasks.c timers.c
+FREERTOS_SOURCE ?= $(LIB_PATH)/$(FREERTOS)/FreeRTOS/Source
 
 ifeq ($(CPU_ARCH),ARMCM0)
-FREERTOS_PORT = ARM_CM0
+  FREERTOS_PORT = ARM_CM0
 endif
 ifeq ($(CPU_ARCH),ARMCM3)
-FREERTOS_PORT = ARM_CM3
+  FREERTOS_PORT = ARM_CM3
 endif
 ifeq ($(CPU_ARCH),ARMCM4)
-FREERTOS_PORT = ARM_CM4F
+  FREERTOS_PORT = ARM_CM4F
 endif
 
 ifeq ($(FREERTOS_PORT),)
-$(error CPU_ARCH not defined. This is required to build the FreeRTOS Port)
+  $(error CPU_ARCH not defined. This is required to build the FreeRTOS Port)
 endif
-
-RTOS_PORT_SRC = $(FREERTOS_SOURCE)/portable/GCC/$(FREERTOS_PORT)/port.c
 
 #If no heap implementation has been defined, choose heap 1
 # Note that this implementation does not allow free
 ifeq ($(FREERTOS_HEAP),)
-$(warning No heap selected, defaulting to heap 1 (Memory cannot be freed!!))
-FREERTOS_HEAP = heap_1
+  $(warning No heap selected, defaulting to heap 1 (Memory cannot be freed!!))
+  FREERTOS_HEAP = heap_1
 endif
 
-FREERTOS_SRCS += $(FREERTOS_SOURCE)/portable/MemMang/$(FREERTOS_HEAP).c $(RTOS_PORT_SRC)
-
-#All of the standard sources
-FREERTOS_SRCS += $(addprefix $(FREERTOS_SOURCE)/,$(rtos_srcs))
-FREERTOS_OBJS = $(FREERTOS_SRCS:.c=.o)
+FREERTOS_C_FILES += $(FREERTOS_SOURCE)/portable/GCC/$(FREERTOS_PORT)/port.c
+FREERTOS_C_FILES += $(FREERTOS_SOURCE)/portable/MemMang/$(FREERTOS_HEAP).c
+FREERTOS_C_FILES += $(wildcard $(FREERTOS_SOURCE)/*.c)
 
 #FreeRTOS Includes
-LIB_INCLUDES += -I$(FREERTOS_SOURCE)/include \
-	-I$(FREERTOS_SOURCE)/portable/GCC/$(FREERTOS_PORT)
+LIB_INCLUDES += -I$(FREERTOS_SOURCE)/include
+LIB_INCLUDES += -I$(FREERTOS_SOURCE)/portable/GCC/$(FREERTOS_PORT)
 
 BASE_LIBS += freertos
 

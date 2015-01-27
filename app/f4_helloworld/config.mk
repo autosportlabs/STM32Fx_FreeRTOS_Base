@@ -4,9 +4,6 @@ TARGET = f4_helloworld
 # board specific config file
 include board/open407v_d/config.mk
 
-#Base directory of our application (assumes FreeRTOS_Base is '.')
-APP_BASE = app/f4_helloworld
-
 #Version of FreeRTOS we'll be using
 FREERTOS = FreeRTOSV7.6.0
 
@@ -24,18 +21,11 @@ STM32F4XX_LIBS = 1
 #Uncomment the following line to enable ITM support (Trace Usart)
 ITM = 1
 
-# The source files of our application
-APP_SRC = main.c leds.c blinky.c
-
-#Macro that expands our source files into their fully qualified paths
-#and adds a macro explaining how to convert them to binary
-APP_OBJS = $(addprefix $(APP_BASE)/, $(APP_SRC:.c=.o))
+APP_C_FILES += $(wildcard $(APP_PATH)/*.c)
 
 #Uncomment the following to enable newlib support
 APP_INCLUDES += -Iutil
-NEWLIB_SRC += newlib.c
-NEWLIB_OBJS += $(addprefix util/, $(NEWLIB_SRC:.c=.o))
-APP_OBJS += $(NEWLIB_OBJS)
+APP_C_FILES  += util/newlib.c
 
 #Uncomment the following to use the ITM (trace macrocell) for printf
 APP_DEFINES += -DUSE_ITM

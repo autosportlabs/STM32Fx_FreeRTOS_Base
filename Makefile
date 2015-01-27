@@ -31,10 +31,11 @@ ifeq ($(APP),)
     APP = $(shell cat app.default)
   endif
 else
-$(shell echo "$(APP)" > app.default)
+  $(shell echo "$(APP)" > app.default)
 endif
 
 APP_PATH     := app/$(APP)
+LIB_PATH     := libs
 APP_INCLUDES += -I$(APP_PATH)
 
 # load the board specific configuration
@@ -84,8 +85,16 @@ ifneq ($(V),1)
   MAKEFLAGS += --no-print-directory
 endif
 
-# common objects
-OBJS += $(CPU_OBJS) $(BOARD_OBJS) $(APP_OBJS)
+FREERTOS_D_FILES       = $(FREERTOS_C_FILES:.c=.d)
+FREERTOS_O_FILES       = $(FREERTOS_C_FILES:.c=.o)       $(FREERTOS_S_FILES:.s=.o)
+STM32F0_PERIPH_D_FILES = $(STM32F0_PERIPH_C_FILES:.c=.d)
+STM32F0_PERIPH_O_FILES = $(STM32F0_PERIPH_C_FILES:.c=.o) $(STM32F0_PERIPH_S_FILES:.s=.o)
+STM32F4_PERIPH_D_FILES = $(STM32F4_PERIPH_C_FILES:.c=.d)
+STM32F4_PERIPH_O_FILES = $(STM32F4_PERIPH_C_FILES:.c=.o) $(STM32F4_PERIPH_S_FILES:.s=.o)
+STM32_USB_D_FILES      = $(STM32_USB_C_FILES:.c=.d)
+STM32_USB_O_FILES      = $(STM32_USB_C_FILES:.c=.o)      $(STM32_USB_S_FILES:.s=.o)
+APP_D_FILES            = $(APP_C_FILES:.c=.d)
+APP_O_FILES            = $(APP_C_FILES:.c=.o)            $(APP_S_FILES:.s=.o)
 
 ifeq ($(TARGET),)
   $(error TARGET is not defined, please define it in your applications config.mk)
@@ -93,28 +102,26 @@ endif
 
 LIBS_ALL = $(addprefix lib,$(BASE_LIBS:=.a))
 
-all: $(LIBS_ALL) $(TARGET).bin
-
-libfreertos.a: $(FREERTOS_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
-libstm32f4_periph.a: $(STM32F4_PERIPH_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
-libstm32f0_periph.a: $(STM32F0_PERIPH_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
-libstm32_usb.a: $(STM32_USB_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
 $(TARGET).bin: $(TARGET).elf
 	@printf "  OBJCOPY $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(PREFIX)-objcopy -Obinary $< $@
 
-$(TARGET).elf: $(OBJS)
+$(TARGET).elf: $(LIBS_ALL) $(APP_O_FILES)
 	@printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(CC) -o $@ $(OBJS) $(LDFLAGS)
+	$(Q)$(CC) -o $@ $(APP_O_FILES) $(LDFLAGS)
 	$(PREFIX)-size $(TARGET).elf
+
+libfreertos.a: $(FREERTOS_O_FILES)
+	$(Q)$(AR) $(ARFLAGS) $@ $^
+
+libstm32f0_periph.a: $(STM32F0_PERIPH_O_FILES)
+	$(Q)$(AR) $(ARFLAGS) $@ $^
+
+libstm32f4_periph.a: $(STM32F4_PERIPH_O_FILES)
+	$(Q)$(AR) $(ARFLAGS) $@ $^
+
+libstm32_usb.a: $(STM32_USB_O_FILES)
+	$(Q)$(AR) $(ARFLAGS) $@ $^
 
 .c.o:
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
@@ -125,12 +132,19 @@ $(TARGET).elf: $(OBJS)
 	$(Q)$(CC) $(ASFLAGS) -c -o $@ $<
 
 clean:
-	$(Q)rm -f *.a $(OBJS) $(LIBS_ALL) \
-	$(STM32F4_PERIPH_OBJS)            \
-	$(STM32F0_PERIPH_OBJS)            \
-	$(FREERTOS_OBJS)                  \
-	$(shell find . -name "*.d")       \
-	$(TARGET).bin $(TARGET).elf
+	$(Q)rm -f \
+	$(FREERTOS_D_FILES)         \
+	$(FREERTOS_O_FILES)         \
+	$(STM32F0_PERIPH_D_FILES)   \
+	$(STM32F0_PERIPH_O_FILES)   \
+	$(STM32F4_PERIPH_D_FILES)   \
+	$(STM32F4_PERIPH_O_FILES)   \
+	$(STM32_USB_D_FILES)        \
+	$(STM32_USB_O_FILES)        \
+	$(APP_D_FILES)              \
+	$(APP_O_FILES)              \
+	$(TARGET).bin $(TARGET).elf \
+	$(LIBS_ALL)
 
 st-flash: $(TARGET).bin
 	sudo st-flash write $(TARGET).bin 0x08000000
