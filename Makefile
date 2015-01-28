@@ -158,4 +158,9 @@ ddd: $(TARGET).elf
 gdb: $(TARGET).elf
 	$(GDB) -ex "target ext localhost:3333" -ex "mon reset halt" -ex "mon arm semihosting enable" $(TARGET).elf
 
+-include $(FREERTOS_D_FILES)
+-include $(STM32F0_PERIPH_D_FILES)
+-include $(STM32F4_PERIPH_D_FILES)
+-include $(APP_D_FILES)
+
 .PHONY: clean flash debug ddd
