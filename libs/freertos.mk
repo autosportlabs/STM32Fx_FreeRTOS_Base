@@ -29,7 +29,7 @@ endif
 
 FREERTOS_C_FILES += $(FREERTOS_SOURCE)/portable/GCC/$(FREERTOS_PORT)/port.c
 FREERTOS_C_FILES += $(FREERTOS_SOURCE)/portable/MemMang/$(FREERTOS_HEAP).c
-FREERTOS_C_FILES += $(wildcard $(FREERTOS_SOURCE)/*.c)
+FREERTOS_C_FILES += $(sort $(wildcard $(FREERTOS_SOURCE)/*.c))
 
 #FreeRTOS Includes
 LIB_INCLUDES += -I$(FREERTOS_SOURCE)/include

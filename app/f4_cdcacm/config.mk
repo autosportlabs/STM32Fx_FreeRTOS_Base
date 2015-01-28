@@ -24,7 +24,7 @@ STM32_USB_DEV_CDC = 1
 #Uncomment the following line to enable ITM support (Trace Usart)
 ITM = 1
 
-APP_C_FILES += $(wildcard $(APP_PATH)/*.c)
+APP_C_FILES += $(sort $(wildcard $(APP_PATH)/*.c))
 
 #Uncomment the following to enable newlib support
 APP_INCLUDES += -Iutil

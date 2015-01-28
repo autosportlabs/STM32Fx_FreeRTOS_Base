@@ -18,7 +18,7 @@ STM32F0XX_LIBS = 1
 #STM32_USB_HOST = 1
 #STM32_USB_OTG = 1
 
-APP_C_FILES += $(wildcard $(APP_PATH)/*.c)
+APP_C_FILES += $(sort $(wildcard $(APP_PATH)/*.c))
 
 #Uncomment the following to enable newlib support
 #APP_INCLUDES += -Iutil

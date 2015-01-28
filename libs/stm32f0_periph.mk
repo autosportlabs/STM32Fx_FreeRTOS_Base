@@ -10,7 +10,7 @@ F0_CMSIS_DEVICE_BASE = $(F0_CMSIS_BASE)/Device/ST/STM32F0xx
 F0_LIB_BASE = $(F0_PERIPH_BASE)/STM32F0xx_StdPeriph_Driver
 
 STM32F0_PERIPH_C_FILES += $(F0_CMSIS_DEVICE_BASE)/Source/Templates/system_stm32f0xx.c
-STM32F0_PERIPH_C_FILES += $(wildcard $(F0_LIB_BASE)/src/*.c)
+STM32F0_PERIPH_C_FILES += $(sort $(wildcard $(F0_LIB_BASE)/src/*.c))
 
 ifeq ($(CPU), stm32f030)
   STM32F0_PERIPH_S_FILES = $(F0_CMSIS_DEVICE_BASE)/Source/Templates/gcc_ride7/startup_stm32f030.s

@@ -12,7 +12,7 @@ F4_CMSIS_DEVICE_BASE = $(F4_CMSIS_BASE)/Device/ST/STM32F4xx
 F4_LIB_BASE = $(F4_PERIPH_BASE)/STM32F4xx_StdPeriph_Driver
 
 STM32F4_PERIPH_C_FILES += $(F4_CMSIS_DEVICE_BASE)/Source/Templates/system_stm32f4xx.c
-STM32F4_PERIPH_C_FILES += $(wildcard $(F4_LIB_BASE)/src/*.c)
+STM32F4_PERIPH_C_FILES += $(sort $(wildcard $(F4_LIB_BASE)/src/*.c))
 STM32F4_PERIPH_S_FILES += $(F4_CMSIS_DEVICE_BASE)/Source/Templates/gcc_ride7/startup_stm32f4xx.s
 
 # Std periph includes
