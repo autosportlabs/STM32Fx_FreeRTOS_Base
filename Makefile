@@ -123,11 +123,11 @@ libstm32f4_periph.a: $(STM32F4_PERIPH_O_FILES)
 libstm32_usb.a: $(STM32_USB_O_FILES)
 	$(Q)$(AR) $(ARFLAGS) $@ $^
 
-.c.o:
+%.o: %.c
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
 
-.s.o:
+%.o: %.s
 	@printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) $(ASFLAGS) -c -o $@ $<
 
