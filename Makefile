@@ -63,26 +63,26 @@ GDB     := $(PREFIX)-gdb
 #application libraries
 include libs.mk
 
-CFLAGS ?= -Os -g -Wall -fno-common -c -mthumb \
-	  -mcpu=$(CPU_TYPE) -MD -std=gnu99
-
-INCLUDES += $(CPU_INCLUDES) $(BOARD_INCLUDES) $(LIB_INCLUDES) $(APP_INCLUDES)
-CFLAGS += $(INCLUDES) $(CPU_DEFINES) $(BOARD_DEFINES) $(APP_DEFINES) $(CPU_FLAGS)
-ASFLAGS += -mcpu=$(CPU_TYPE) $(FPU) -g -Wa,--warn
-
 LIBS = -lnosys
 LIBS += $(addprefix -l,$(BASE_LIBS))
 
-LDFLAGS ?= --specs=nano.specs -lc -lgcc $(LIBS) -mcpu=$(CPU_TYPE) -g -gdwarf-2 \
-	-L. -Lcpu/common -L$(CPU_BASE) -T$(CPU_LINK_MEM) -Tlink_sections.ld \
-	-nostartfiles -Wl,--gc-sections -mthumb -mcpu=$(CPU_TYPE) \
-	-msoft-float
+INCLUDES += $(CPU_INCLUDES) $(BOARD_INCLUDES) $(LIB_INCLUDES) $(APP_INCLUDES)
+CFLAGS    = $(INCLUDES) $(CPU_DEFINES) $(BOARD_DEFINES) $(APP_DEFINES) $(CPU_FLAGS) \
+            -Os -g -Wall -fno-common -c -mthumb -mcpu=$(CPU_TYPE) -MD -std=gnu99
+ASFLAGS   = -mcpu=$(CPU_TYPE) $(FPU) -g -Wa,--warn
+ARFLAGS   = rv
+LDFLAGS  ?= --specs=nano.specs -lc -lgcc $(LIBS) -mcpu=$(CPU_TYPE) -g -gdwarf-2 \
+	 -L. -Lcpu/common -L$(CPU_BASE) -T$(CPU_LINK_MEM) -Tlink_sections.ld \
+	 -nostartfiles -Wl,--gc-sections -mthumb -mcpu=$(CPU_TYPE) \
+	 -msoft-float
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
   Q := @
   # Do not print "Entering directory ...".
   MAKEFLAGS += --no-print-directory
+  # Redirect stdout/stderr for chatty tools
+  NOOUT = 1> /dev/null 2> /dev/null  
 endif
 
 FREERTOS_D_FILES       = $(FREERTOS_C_FILES:.c=.d)
@@ -109,19 +109,19 @@ $(TARGET).bin: $(TARGET).elf
 $(TARGET).elf: $(LIBS_ALL) $(APP_O_FILES)
 	@printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) -o $@ $(APP_O_FILES) $(LDFLAGS)
-	$(PREFIX)-size $(TARGET).elf
+	$(Q)$(PREFIX)-size $(TARGET).elf
 
 libfreertos.a: $(FREERTOS_O_FILES)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
 libstm32f0_periph.a: $(STM32F0_PERIPH_O_FILES)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
 libstm32f4_periph.a: $(STM32F4_PERIPH_O_FILES)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
 libstm32_usb.a: $(STM32_USB_O_FILES)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
 %.o: %.c
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
