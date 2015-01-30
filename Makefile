@@ -31,10 +31,11 @@ ifeq ($(APP),)
     APP = $(shell cat app.default)
   endif
 else
-$(shell echo "$(APP)" > app.default)
+  $(shell echo "$(APP)" > app.default)
 endif
 
 APP_PATH     := app/$(APP)
+LIB_PATH     := libs
 APP_INCLUDES += -I$(APP_PATH)
 
 # load the board specific configuration
@@ -62,30 +63,38 @@ GDB     := $(PREFIX)-gdb
 #application libraries
 include libs.mk
 
-CFLAGS ?= -Os -g -Wall -fno-common -c -mthumb \
-	  -mcpu=$(CPU_TYPE) -MD -std=gnu99
-
-INCLUDES += $(CPU_INCLUDES) $(BOARD_INCLUDES) $(LIB_INCLUDES) $(APP_INCLUDES)
-CFLAGS += $(INCLUDES) $(CPU_DEFINES) $(BOARD_DEFINES) $(APP_DEFINES) $(CPU_FLAGS)
-ASFLAGS += -mcpu=$(CPU_TYPE) $(FPU) -g -Wa,--warn
-
 LIBS = -lnosys
 LIBS += $(addprefix -l,$(BASE_LIBS))
 
-LDFLAGS ?= --specs=nano.specs -lc -lgcc $(LIBS) -mcpu=$(CPU_TYPE) -g -gdwarf-2 \
-	-L. -Lcpu/common -L$(CPU_BASE) -T$(CPU_LINK_MEM) -Tlink_sections.ld \
-	-nostartfiles -Wl,--gc-sections -mthumb -mcpu=$(CPU_TYPE) \
-	-msoft-float
+INCLUDES += $(CPU_INCLUDES) $(BOARD_INCLUDES) $(LIB_INCLUDES) $(APP_INCLUDES)
+CFLAGS    = $(INCLUDES) $(CPU_DEFINES) $(BOARD_DEFINES) $(APP_DEFINES) $(CPU_FLAGS) \
+            -Os -g -Wall -fno-common -c -mthumb -mcpu=$(CPU_TYPE) -MD -std=gnu99
+ASFLAGS   = -mcpu=$(CPU_TYPE) $(FPU) -g -Wa,--warn
+ARFLAGS   = rv
+LDFLAGS  ?= --specs=nano.specs -lc -lgcc $(LIBS) -mcpu=$(CPU_TYPE) -g -gdwarf-2 \
+	 -L. -Lcpu/common -L$(CPU_BASE) -T$(CPU_LINK_MEM) -Tlink_sections.ld \
+	 -nostartfiles -Wl,--gc-sections -mthumb -mcpu=$(CPU_TYPE) \
+	 -msoft-float
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
   Q := @
   # Do not print "Entering directory ...".
   MAKEFLAGS += --no-print-directory
+  # Redirect stdout/stderr for chatty tools
+  NOOUT = 1> /dev/null 2> /dev/null  
 endif
 
-# common objects
-OBJS += $(CPU_OBJS) $(BOARD_OBJS) $(APP_OBJS)
+FREERTOS_D_FILES       = $(FREERTOS_C_FILES:.c=.d)
+FREERTOS_O_FILES       = $(FREERTOS_C_FILES:.c=.o)       $(FREERTOS_S_FILES:.s=.o)
+STM32F0_PERIPH_D_FILES = $(STM32F0_PERIPH_C_FILES:.c=.d)
+STM32F0_PERIPH_O_FILES = $(STM32F0_PERIPH_C_FILES:.c=.o) $(STM32F0_PERIPH_S_FILES:.s=.o)
+STM32F4_PERIPH_D_FILES = $(STM32F4_PERIPH_C_FILES:.c=.d)
+STM32F4_PERIPH_O_FILES = $(STM32F4_PERIPH_C_FILES:.c=.o) $(STM32F4_PERIPH_S_FILES:.s=.o)
+STM32_USB_D_FILES      = $(STM32_USB_C_FILES:.c=.d)
+STM32_USB_O_FILES      = $(STM32_USB_C_FILES:.c=.o)      $(STM32_USB_S_FILES:.s=.o)
+APP_D_FILES            = $(APP_C_FILES:.c=.d)
+APP_O_FILES            = $(APP_C_FILES:.c=.o)            $(APP_S_FILES:.s=.o)
 
 ifeq ($(TARGET),)
   $(error TARGET is not defined, please define it in your applications config.mk)
@@ -93,50 +102,65 @@ endif
 
 LIBS_ALL = $(addprefix lib,$(BASE_LIBS:=.a))
 
-all: $(LIBS_ALL) $(TARGET).bin
-
-libfreertos.a: $(FREERTOS_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
-libstm32f4_periph.a: $(STM32F4_PERIPH_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
-libstm32f0_periph.a: $(STM32F0_PERIPH_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
-libstm32_usb.a: $(STM32_USB_OBJS)
-	$(Q)$(AR) $(ARFLAGS) $@ $^
-
 $(TARGET).bin: $(TARGET).elf
 	@printf "  OBJCOPY $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(PREFIX)-objcopy -Obinary $< $@
 
-$(TARGET).elf: $(OBJS)
+$(TARGET).elf: $(LIBS_ALL) $(APP_O_FILES)
 	@printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
-	$(Q)$(CC) -o $@ $(OBJS) $(LDFLAGS)
-	$(PREFIX)-size $(TARGET).elf
+	$(Q)$(CC) -o $@ $(APP_O_FILES) $(LDFLAGS)
+	$(Q)$(PREFIX)-size $(TARGET).elf
 
-.c.o:
+libfreertos.a: $(FREERTOS_O_FILES)
+	@printf "  AR      $(@)\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
+ifneq ($(FREERTOS_WARNING),)
+	@echo $(FREERTOS_WARNING)
+endif
+
+libstm32f0_periph.a: $(STM32F0_PERIPH_O_FILES)
+	@printf "  AR      $(@)\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
+
+libstm32f4_periph.a: $(STM32F4_PERIPH_O_FILES)
+	@printf "  AR      $(@)\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
+
+libstm32_usb.a: $(STM32_USB_O_FILES)
+	@printf "  AR      $(@)\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
+
+%.o: %.c
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
 
-.s.o:
+%.o: %.s
 	@printf "  AS      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) $(ASFLAGS) -c -o $@ $<
 
 clean:
-	$(Q)rm -f *.a $(OBJS) $(LIBS_ALL) \
-	$(STM32F4_PERIPH_OBJS)            \
-	$(STM32F0_PERIPH_OBJS)            \
-	$(FREERTOS_OBJS)                  \
-	$(shell find . -name "*.d")       \
-	$(TARGET).bin $(TARGET).elf
+	$(Q)rm -f \
+	$(FREERTOS_D_FILES)         \
+	$(FREERTOS_O_FILES)         \
+	$(STM32F0_PERIPH_D_FILES)   \
+	$(STM32F0_PERIPH_O_FILES)   \
+	$(STM32F4_PERIPH_D_FILES)   \
+	$(STM32F4_PERIPH_O_FILES)   \
+	$(STM32_USB_D_FILES)        \
+	$(STM32_USB_O_FILES)        \
+	$(APP_D_FILES)              \
+	$(APP_O_FILES)              \
+	$(TARGET).bin $(TARGET).elf \
+	$(LIBS_ALL)
 
 st-flash: $(TARGET).bin
 	sudo st-flash write $(TARGET).bin 0x08000000
 
-debug: $(TARGET).bin
-	$(OPENOCD) -f $(APP_PATH)/openocd.cfg
+debug: $(TARGET).elf
+	$(OPENOCD) -f $(APP_PATH)/debug.ocd
+
+flash: $(TARGET).elf
+	$(OPENOCD) -f $(APP_PATH)/debug.ocd -f $(APP_PATH)/flash.ocd
 
 ddd: $(TARGET).elf
 	$(DDD) --eval-command="target remote localhost:3333" --debugger $(GDB) $(TARGET).elf
@@ -144,4 +168,9 @@ ddd: $(TARGET).elf
 gdb: $(TARGET).elf
 	$(GDB) -ex "target ext localhost:3333" -ex "mon reset halt" -ex "mon arm semihosting enable" $(TARGET).elf
 
-.PHONY: clean flash debug ddd
+-include $(FREERTOS_D_FILES)
+-include $(STM32F0_PERIPH_D_FILES)
+-include $(STM32F4_PERIPH_D_FILES)
+-include $(APP_D_FILES)
+
+.PHONY: clean st-flash debug flash ddd gdb
