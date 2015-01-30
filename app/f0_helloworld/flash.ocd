@@ -1,0 +1,2 @@
+program f0_helloworld.elf verify
+reset run

@@ -156,8 +156,11 @@ clean:
 st-flash: $(TARGET).bin
 	sudo st-flash write $(TARGET).bin 0x08000000
 
-debug: $(TARGET).bin
-	$(OPENOCD) -f $(APP_PATH)/openocd.cfg
+debug: $(TARGET).elf
+	$(OPENOCD) -f $(APP_PATH)/debug.ocd
+
+flash: $(TARGET).elf
+	$(OPENOCD) -f $(APP_PATH)/debug.ocd -f $(APP_PATH)/flash.ocd
 
 ddd: $(TARGET).elf
 	$(DDD) --eval-command="target remote localhost:3333" --debugger $(GDB) $(TARGET).elf
@@ -170,4 +173,4 @@ gdb: $(TARGET).elf
 -include $(STM32F4_PERIPH_D_FILES)
 -include $(APP_D_FILES)
 
-.PHONY: clean flash debug ddd
+.PHONY: clean st-flash debug flash ddd gdb

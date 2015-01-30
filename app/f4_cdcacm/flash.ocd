@@ -1,0 +1,2 @@
+program f4_cdcacm.elf verify
+reset run
