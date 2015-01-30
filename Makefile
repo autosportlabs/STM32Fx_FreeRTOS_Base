@@ -112,15 +112,22 @@ $(TARGET).elf: $(LIBS_ALL) $(APP_O_FILES)
 	$(Q)$(PREFIX)-size $(TARGET).elf
 
 libfreertos.a: $(FREERTOS_O_FILES)
+	@printf "  AR      $(@)\n"
 	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
+ifneq ($(FREERTOS_WARNING),)
+	@echo $(FREERTOS_WARNING)
+endif
 
 libstm32f0_periph.a: $(STM32F0_PERIPH_O_FILES)
+	@printf "  AR      $(@)\n"
 	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
 libstm32f4_periph.a: $(STM32F4_PERIPH_O_FILES)
+	@printf "  AR      $(@)\n"
 	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
 libstm32_usb.a: $(STM32_USB_O_FILES)
+	@printf "  AR      $(@)\n"
 	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
 %.o: %.c

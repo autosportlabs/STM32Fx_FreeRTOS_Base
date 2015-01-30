@@ -20,10 +20,13 @@ ifeq ($(FREERTOS_PORT),)
   $(error CPU_ARCH not defined. This is required to build the FreeRTOS Port)
 endif
 
-#If no heap implementation has been defined, choose heap 1
+# If no heap implementation has been defined, choose heap 1
 # Note that this implementation does not allow free
+ifeq ($(FREERTOS_HEAP),heap_1)
+  FREERTOS_WARNING = "Memory cannot be freed (user-selected)."
+endif
 ifeq ($(FREERTOS_HEAP),)
-  $(warning No heap selected, defaulting to heap 1 (Memory cannot be freed!!))
+  FREERTOS_WARNING = "Memory cannot be freed (default)."
   FREERTOS_HEAP = heap_1
 endif
 
