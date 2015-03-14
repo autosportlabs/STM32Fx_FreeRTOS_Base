@@ -152,8 +152,8 @@ libshell.a: $(SHELL_O_FILES)
 
 clean:
 	$(Q)rm -f \
-	$(SHELL_O_FILES)            \
 	$(SHELL_D_FILES)            \
+	$(SHELL_O_FILES)            \
 	$(STM32F0_DRIVERS_D_FILES)  \
 	$(STM32F0_DRIVERS_O_FILES)  \
 	$(FREERTOS_D_FILES)         \
@@ -184,10 +184,11 @@ ddd: $(TARGET).elf
 gdb: $(TARGET).elf
 	$(GDB) -ex "target ext localhost:3333" -ex "mon reset halt" -ex "mon arm semihosting enable" $(TARGET).elf
 
--include $(SHELL_D_FILES)
+-include $(STM32F0_DRIVERS_D_FILES)	
 -include $(FREERTOS_D_FILES)
 -include $(STM32F0_PERIPH_D_FILES)
 -include $(STM32F4_PERIPH_D_FILES)
 -include $(APP_D_FILES)
+-include $(SHELL_D_FILES)
 
 .PHONY: clean st-flash debug flash ddd gdb

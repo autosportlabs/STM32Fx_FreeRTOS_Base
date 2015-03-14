@@ -1,7 +1,7 @@
 #include <stdint.h>
 
-#include <stm32f4xx_gpio.h>
-#include <stm32f4xx_rcc.h>
+#include <stm32f0xx_gpio.h>
+#include <stm32f0xx_rcc.h>
 
 struct led {
 	GPIO_TypeDef *port;
@@ -10,10 +10,10 @@ struct led {
 };
 
 static struct led leds[] = {
-	{ GPIOD, GPIO_Pin_12, 0 },
-	{ GPIOD, GPIO_Pin_13, 0 },
-	{ GPIOD, GPIO_Pin_14, 0 },
-	{ GPIOD, GPIO_Pin_15, 0 },
+	{ GPIOC, GPIO_Pin_8, 0 },
+	{ GPIOC, GPIO_Pin_6, 0 },
+	{ GPIOC, GPIO_Pin_9, 0 },
+	{ GPIOC, GPIO_Pin_7, 0 },
 };
 
 void led_init(void)
@@ -25,15 +25,15 @@ void led_init(void)
 	GPIO_StructInit(&gpio_conf);
 
 	/* turn on debug port and clock */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 
 	gpio_conf.GPIO_Speed = GPIO_Speed_50MHz;
 	gpio_conf.GPIO_Mode = GPIO_Mode_OUT;
 	gpio_conf.GPIO_OType = GPIO_OType_PP;
 
-	for (i = 0; i < 4; ++i) {
+	for (i = 0; i < 4; ++i){
 		gpio_conf.GPIO_Pin = leds[i].mask;
-		GPIO_Init(GPIOD, &gpio_conf);
+		GPIO_Init(GPIOC, &gpio_conf);
 	}
 
 }

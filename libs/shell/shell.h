@@ -10,6 +10,5 @@ struct shell_cmd {
 #define SHELL_MAX_COMMANDS 10
 
 void shell_init(void);
-void shell_process(void *params);
-int shell_register_command(struct shell_cmd *command);
+int shell_register_command(const struct shell_cmd *command);
 #endif
