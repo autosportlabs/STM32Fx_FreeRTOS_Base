@@ -1,6 +1,6 @@
-#ifdef USE_ITM
-  #include <platform_debug.h>
-#else
+#include <platform_debug.h>
+
+#ifndef USE_ITM
   #include <usart.h>
 #endif
 
@@ -11,6 +11,8 @@
 #include <sys/unistd.h>
 #include <sys/time.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 
 #undef errno
 extern int errno;
@@ -18,7 +20,16 @@ extern int errno;
 char *__env[1] = { 0 };
 char **environ = __env;
 
+/* We use this to determine if a usart has been registered for use
+ * with printf/et.al. */
+static int dbg_usart = -1;
+
 int _write(int file, char *ptr, int len);
+
+void newlib_register_dbg_usart(int usart)
+{
+	dbg_usart = usart;
+}
 
 void _exit(int status)
 {
@@ -133,7 +144,9 @@ caddr_t _sbrk(int incr)
 
 int _read(int file, char *ptr, int len)
 {
-	char c = 0x00;
+	int ret;
+	if (dbg_usart == -1)
+		return -EIO;
 
 	/* TODO: remove this when we build in support */
 	(void)len;
@@ -143,15 +156,14 @@ int _read(int file, char *ptr, int len)
 #ifdef USE_ITM
 			/* TODO */
 #else
-			/* TODO */
+			ret = usart_read(dbg_usart, ptr, len);
 #endif
-			*ptr++ = c;
-			return 1;
 			break;
 		default:
 			errno = EBADF;
-			return -1;
+			ret = -1;
 	}
+	return ret;
 }
 
 int _stat(const char *filepath, struct stat *st)
@@ -185,24 +197,26 @@ int _wait(int *status)
 int _write(int file, char *ptr, int len)
 {
 	int n;
-	char c;
+
+	if (dbg_usart == -1)
+		return -EIO;
+		
 	switch (file)
 	{
 		case STDOUT_FILENO: /*stdout*/
 		case STDERR_FILENO: /* stderr */
+#ifdef USE_ITM
 			for (n = 0; n < len; n++)
 			{
-				c = (uint8_t)*ptr++;
-#ifdef USE_ITM
-				ITM_SendChar(c);
-#else
-				/* TODO: Add usart support */
-#endif
+				ITM_SendChar(*ptr++);
 			}
+#else
+			n = usart_write(dbg_usart, ptr, len);
+#endif
 			break;
 		default:
 			errno = EBADF;
 			return -1;
 	}
-	return len;
+	return n;
 }
