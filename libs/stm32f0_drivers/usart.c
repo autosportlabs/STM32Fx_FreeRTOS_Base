@@ -219,11 +219,10 @@ int usart_write(int usart_no, char *s, int len)
 		s++;
 		ret++;
 
-		if (q_ret != pdTRUE) {
+		if (q_ret != pdTRUE)
 			return -EIO;
-		} else {
-			USART_ITConfig(u->periph, USART_IT_TXE, ENABLE);
-		}
+
+		USART_ITConfig(u->periph, USART_IT_TXE, ENABLE);
 	}
 
 	return ret;
@@ -242,11 +241,12 @@ int usart_read(int usart_no, char *d, int len)
 	if (!u)
 		return -ENODEV;
 
-	if(!u->initialized)
+	if (!u->initialized)
 		return -ENOTCONN;
 
 	while (len--) {
-		xQueueReceive(u->buffers.rx, d++, portMAX_DELAY);
+		if (xQueueReceive(u->buffers.rx, d++, portMAX_DELAY) != pdTRUE)
+			return ret;
 		ret++;
 	}
 
@@ -258,7 +258,7 @@ int usart_getchar(int usart_no, char *c)
 	return usart_read(usart_no, c, 1);
 }
 
-void usart_common_irq(struct usart *u)
+static void usart_common_irq(struct usart *u)
 {
 	portBASE_TYPE q_ret, tx_task_woken, rx_task_woken;
 	char c;
