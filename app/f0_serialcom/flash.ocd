@@ -1,0 +1,2 @@
+program f0_serialcom.elf verify
+reset run

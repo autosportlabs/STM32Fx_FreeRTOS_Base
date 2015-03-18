@@ -82,19 +82,23 @@ ifneq ($(V),1)
   # Do not print "Entering directory ...".
   MAKEFLAGS += --no-print-directory
   # Redirect stdout/stderr for chatty tools
-  NOOUT = 1> /dev/null 2> /dev/null  
+  NOOUT = 1> /dev/null 2> /dev/null
 endif
 
-FREERTOS_D_FILES       = $(FREERTOS_C_FILES:.c=.d)
-FREERTOS_O_FILES       = $(FREERTOS_C_FILES:.c=.o)       $(FREERTOS_S_FILES:.s=.o)
-STM32F0_PERIPH_D_FILES = $(STM32F0_PERIPH_C_FILES:.c=.d)
-STM32F0_PERIPH_O_FILES = $(STM32F0_PERIPH_C_FILES:.c=.o) $(STM32F0_PERIPH_S_FILES:.s=.o)
-STM32F4_PERIPH_D_FILES = $(STM32F4_PERIPH_C_FILES:.c=.d)
-STM32F4_PERIPH_O_FILES = $(STM32F4_PERIPH_C_FILES:.c=.o) $(STM32F4_PERIPH_S_FILES:.s=.o)
-STM32_USB_D_FILES      = $(STM32_USB_C_FILES:.c=.d)
-STM32_USB_O_FILES      = $(STM32_USB_C_FILES:.c=.o)      $(STM32_USB_S_FILES:.s=.o)
-APP_D_FILES            = $(APP_C_FILES:.c=.d)
-APP_O_FILES            = $(APP_C_FILES:.c=.o)            $(APP_S_FILES:.s=.o)
+STM32F0_DRIVERS_D_FILES = $(STM32F0_DRIVERS_C_FILES:.c=.d)
+STM32F0_DRIVERS_O_FILES = $(STM32F0_DRIVERS_C_FILES:.c=.o)
+FREERTOS_D_FILES        = $(FREERTOS_C_FILES:.c=.d)
+FREERTOS_O_FILES        = $(FREERTOS_C_FILES:.c=.o)       $(FREERTOS_S_FILES:.s=.o)
+STM32F0_PERIPH_D_FILES  = $(STM32F0_PERIPH_C_FILES:.c=.d)
+STM32F0_PERIPH_O_FILES  = $(STM32F0_PERIPH_C_FILES:.c=.o) $(STM32F0_PERIPH_S_FILES:.s=.o)
+STM32F4_PERIPH_D_FILES  = $(STM32F4_PERIPH_C_FILES:.c=.d)
+STM32F4_PERIPH_O_FILES  = $(STM32F4_PERIPH_C_FILES:.c=.o) $(STM32F4_PERIPH_S_FILES:.s=.o)
+STM32_USB_D_FILES       = $(STM32_USB_C_FILES:.c=.d)
+STM32_USB_O_FILES       = $(STM32_USB_C_FILES:.c=.o)      $(STM32_USB_S_FILES:.s=.o)
+APP_D_FILES             = $(APP_C_FILES:.c=.d)
+APP_O_FILES             = $(APP_C_FILES:.c=.o)            $(APP_S_FILES:.s=.o)
+SHELL_D_FILES           = $(SHELL_C_FILES:.c=.d)
+SHELL_O_FILES           = $(SHELL_C_FILES:.c=.o)
 
 ifeq ($(TARGET),)
   $(error TARGET is not defined, please define it in your applications config.mk)
@@ -118,6 +122,10 @@ ifneq ($(FREERTOS_WARNING),)
 	@echo $(FREERTOS_WARNING)
 endif
 
+libstm32f0_drivers.a: $(STM32F0_DRIVERS_O_FILES)
+	@printf "  AR      $(@)\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
+
 libstm32f0_periph.a: $(STM32F0_PERIPH_O_FILES)
 	@printf "  AR      $(@)\n"
 	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
@@ -130,6 +138,10 @@ libstm32_usb.a: $(STM32_USB_O_FILES)
 	@printf "  AR      $(@)\n"
 	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
 
+libshell.a: $(SHELL_O_FILES)
+	@printf " AR       $(@)\n"
+	$(Q)$(AR) $(ARFLAGS) $@ $^ $(NOOUT)
+
 %.o: %.c
 	@printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
@@ -140,6 +152,10 @@ libstm32_usb.a: $(STM32_USB_O_FILES)
 
 clean:
 	$(Q)rm -f \
+	$(SHELL_D_FILES)            \
+	$(SHELL_O_FILES)            \
+	$(STM32F0_DRIVERS_D_FILES)  \
+	$(STM32F0_DRIVERS_O_FILES)  \
 	$(FREERTOS_D_FILES)         \
 	$(FREERTOS_O_FILES)         \
 	$(STM32F0_PERIPH_D_FILES)   \
@@ -168,9 +184,11 @@ ddd: $(TARGET).elf
 gdb: $(TARGET).elf
 	$(GDB) -ex "target ext localhost:3333" -ex "mon reset halt" -ex "mon arm semihosting enable" $(TARGET).elf
 
+-include $(STM32F0_DRIVERS_D_FILES)	
 -include $(FREERTOS_D_FILES)
 -include $(STM32F0_PERIPH_D_FILES)
 -include $(STM32F4_PERIPH_D_FILES)
 -include $(APP_D_FILES)
+-include $(SHELL_D_FILES)
 
 .PHONY: clean st-flash debug flash ddd gdb
